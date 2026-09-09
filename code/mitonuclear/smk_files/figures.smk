@@ -94,10 +94,10 @@ rule get_jpt_mt_tree:
   input:
     expand("{data_dir}/GenCode/gencode.v49.annotation.gff3.gz", data_dir=config['data_dir']),
     expand("{results_dir}/single_locus/JPT.pvals", results_dir=config['results_dir']),
-    expand("{tmp_dir2}/JPT_chr19.vcf.gz", tmp_dir2=config['tmp_dir2']), ## FIX BEFORE PUBLISHING
-    expand("{tmp_dir2}/JPT_MT.hsd", tmp_dir2=config['tmp_dir2']),
+    expand("{tmp_dir}/JPT_chr19.vcf.gz", tmp_dir=config['tmp_dir']),
+    expand("{tmp_dir}/JPT_MT.hsd", tmp_dir=config['tmp_dir']),
     expand("{trees_dir}/JPT/JPT_chr19.trees", trees_dir=config['trees_dir']),
-    expand("{tmp_dir2}/JPT_samples.list", tmp_dir2=config['tmp_dir2']),
+    expand("{tmp_dir}/JPT_samples.list", tmp_dir=config['tmp_dir']),
     expand("{trees_dir}/JPT/JPT_chrMT.nwk", trees_dir=config['trees_dir']),
   resources:
     time="0:30:00",
