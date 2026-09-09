@@ -6,7 +6,6 @@ wildcard_constraints:
 
 populations_1000G = ["ACB", "ASW", "ESN", "GWD", "LWK", "MSL", "YRI", "CLM", "MXL", "PEL", "PUR", "CDX", "CHB", "CHS", "JPT", "KHV", "CEU", "FIN", "GBR", "IBS", "TSI", "BEB", "GIH", "ITU", "PJL", "STU"]
 paired_chr20 = ["GWD_YRI", "GWD_PUR", "GWD_CLM", "GWD_CHS", "GWD_JPT", "GWD_IBS", "GWD_TSI", "GWD_GIH", "GWD_STU", "YRI_PUR", "YRI_CLM", "YRI_CHS", "YRI_JPT", "YRI_IBS", "YRI_TSI", "YRI_GIH", "YRI_STU", "PUR_CLM", "PUR_CHS", "PUR_JPT", "PUR_IBS", "PUR_TSI", "PUR_GIH", "PUR_STU", "CLM_CHS", "CLM_JPT", "CLM_IBS", "CLM_TSI", "CLM_GIH", "CLM_STU", "CHS_JPT", "CHS_IBS", "CHS_TSI", "CHS_GIH", "CHS_STU", "JPT_IBS", "JPT_TSI", "JPT_GIH", "JPT_STU", "IBS_TSI", "IBS_GIH", "IBS_STU", "TSI_GIH", "TSI_STU", "GIH_STU"]
-paired_all_chrs = ["GWD_CHS","GWD_IBS","GWD_PUR","GWD_GIH","CHS_IBS","PUR_CHS","CHS_GIH","PUR_IBS","IBS_GIH","PUR_GIH"]
 all_chrs = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"]
 chr_20 = ["20"]
 
