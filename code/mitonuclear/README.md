@@ -1,6 +1,6 @@
 # Mitonuclear cophylogeny
 
-To generate all mitonuclear cophylogeny results and figures from the manuscript, in this directory run
+To generate mitonuclear cophylogeny results and figures from the manuscript, in this directory run
 ```
 snakemake
 ```
