@@ -1,4 +1,4 @@
-# Print the header to standard output (modify as needed to match your column names)
+# Print the header to standard output
 echo -e "chr\t$(head -1 ${1})"
 
 # Loop through each file provided as input
