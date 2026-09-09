@@ -1,0 +1,24 @@
+configfile: "config.yaml"
+
+include: "smk_files/get_trees.smk"
+include:  "smk_files/zscore_and_fis.smk"
+include:  "smk_files/single_locus.smk"
+include:  "smk_files/figures.smk"
+include:  "smk_files/cophylo_analysis.smk"
+    
+fig_names = ["1kg_chr20_vs_fis", 
+            "1kg_fis",
+            "1kg_cophylogeny_scores",
+            "IBS_manhattan", 
+            "JPT_manhattan", 
+            "peaks", 
+            "enrichment", 
+            "JPT_MT_tree"]
+
+rule all:
+  input:
+    expand("{figure_dir}/{figure}.pdf", figure_dir=config['figure_dir'], figure=fig_names)
+  resources:
+    time="1:00:00",
+    threads=1,
+    mem="1gb"

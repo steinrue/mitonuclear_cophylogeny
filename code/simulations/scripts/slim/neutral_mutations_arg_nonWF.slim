@@ -1,0 +1,132 @@
+// Keywords: multispecies, interaction
+
+species all initialize() {
+    initializeSLiMModelType("nonWF");
+}
+
+species host initialize() {
+    initializeSpecies();
+    initializeSLiMOptions(keepPedigrees=T);
+    initializeTreeSeq();
+    initializeSex("A");
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, asInteger(LEN-1));
+    initializeMutationRate(MUT);
+    initializeRecombinationRate(1e-8);
+}
+
+species symbiont initialize() {
+    initializeSpecies();
+    initializeSLiMOptions(keepPedigrees=T);
+    initializeTreeSeq();
+    initializeMutationType("m2", 0.5, "f", 0.0);
+    initializeGenomicElementType("g2", m2, 1.0);
+    initializeGenomicElement(g2, 0, asInteger(LEN-1));
+    initializeMutationRate(MUT);
+    initializeRecombinationRate(0);
+}
+
+ticks all 1 early() {
+    //# Ensure the symbiont transmission rates sum to 1
+    sum = p_mother + p_father + p_random;
+    if (abs(sum - 1.0) > 1e-8) {
+        error("Transmission probabilities p_mother + p_father + p_random must sum to 1 (got " + sum + ")");
+    }
+
+    host.addSubpop("p0", K);
+    symbiont.addSubpop("p1", K);
+    
+    for (s in p1.individuals, h in p0.individuals) {
+        s.tag = h.pedigreeID;
+        h.tag = s.pedigreeID;
+    }
+}
+
+species host reproduction() {
+
+    sym_src = sample(1:3, K, replace = T, weights=c(p_mother, p_father, p_random));
+    src_1 = (sym_src == 1);
+    src_2 = (sym_src == 2);
+    src_3 = (sym_src == 3);
+    females =  p0.subsetIndividuals(sex="F");
+    males =  p0.subsetIndividuals(sex="M");
+    female_fitness = females.fitnessScaling;
+    male_fitness = males.fitnessScaling;
+    fparents = sample(females, K, replace = T, weights=female_fitness);
+    mparents = sample(males, K, replace = T, weights=male_fitness);
+    fparents_1 = fparents[src_1];
+    fparents_2 = fparents[src_2];
+    fparents_3 = fparents[src_3];
+    mparents_1 = mparents[src_1];
+    mparents_2 = mparents[src_2];
+    mparents_3 = mparents[src_3];
+    symbionts_1 = symbiont.individualsWithPedigreeIDs(fparents_1.tag);    // group one gets symbionts from the female parent
+    symbionts_2 = symbiont.individualsWithPedigreeIDs(mparents_2.tag);    // group two gets symbionts from the male parent
+    symbionts_3 = sample(p1.individuals, size(fparents_3), replace = T, weights=p1.individuals.fitnessScaling);                            // group three chooses symbionts randomly from the population
+
+    for (f in fparents_1, m in mparents_1, s in symbionts_1)
+    {
+        new_h = p0.addCrossed(f, m);
+        new_s = p1.addCloned(s);
+        new_h.tag = new_s.pedigreeID;
+        new_s.tag = new_h.pedigreeID;
+    }
+    for (f in fparents_2, m in mparents_2, s in symbionts_2)
+    {
+        new_h = p0.addCrossed(f, m);
+        new_s = p1.addCloned(s);
+        new_h.tag = new_s.pedigreeID;
+        new_s.tag = new_h.pedigreeID;
+    }
+        for (f in fparents_3, m in mparents_3, s in symbionts_3)
+    {
+        new_h = p0.addCrossed(f, m);
+        new_s = p1.addCloned(s);
+        new_h.tag = new_s.pedigreeID;
+        new_s.tag = new_h.pedigreeID;
+    }
+    self.active = 0;
+}
+
+ticks all early() {
+    p1.individuals.genome2.removeMutations();
+    if (community.tick % 1000 == 0) {
+        cat("Tick " + community.tick + "\n");
+    }
+}
+
+species host survival()  {
+    //# survival is independent of fitness; parents die, offspring live
+    return (individual.age == 0);
+}
+
+species symbiont survival()  {
+    //# survival is independent of fitness; parents die, offspring live
+    return (individual.age == 0);
+}
+
+ticks all asInteger(15*K) late() {
+
+    // # Save host data
+    sorted_hosts = sortBy(p0.individuals, "pedigreeID");
+    host_metadataDict = Dictionary("tags", sorted_hosts.tag, "ids", sorted_hosts.pedigreeID);
+    host.treeSeqOutput(host_savepoint, simplify=T, includeModel=T, metadata=host_metadataDict);
+    host_muts = host.mutations;
+    host_mutations = "freq\n";
+    for (hm in host_muts) {
+        host_mutations = host_mutations + host.mutationFrequencies(p0, hm) + "\n";
+    }
+    writeFile(host_mut_freqs, host_mutations);
+    
+    // # Save symb data
+    sorted_symbs = sortBy(p1.individuals, "pedigreeID");
+    symb_metadataDict = Dictionary("tags", sorted_symbs.tag, "ids", sorted_symbs.pedigreeID);
+    symbiont.treeSeqOutput(symb_savepoint, simplify=T, includeModel=T, metadata=symb_metadataDict);
+    symb_muts = symbiont.mutations;
+    symb_mutations = "freq\n";
+    for (sm in symb_muts) {
+        symb_mutations = symb_mutations + 2*symbiont.mutationFrequencies(p1, sm) + "\n";
+    }
+    writeFile(symb_mut_freqs, symb_mutations);
+}

@@ -1,0 +1,306 @@
+species all initialize() {
+    initializeSLiMModelType("nonWF");
+}
+
+species host initialize() {
+    initializeSpecies();
+    initializeSLiMOptions(keepPedigrees=T);
+    initializeTreeSeq();
+    initializeSex("A");
+    initializeMutationType("m1", 0.5, "f", 0.0);
+    initializeGenomicElementType("g1", m1, 1.0);
+    initializeGenomicElement(g1, 0, asInteger(LEN-1));
+    initializeMutationRate(0);
+    initializeRecombinationRate(1e-8);
+}
+
+species symbiont initialize() {
+    initializeSpecies();
+    initializeSLiMOptions(keepPedigrees=T);
+    initializeTreeSeq();
+    initializeMutationType("m2", 0.5, "f", 0.0);
+    initializeGenomicElementType("g2", m2, 1.0);
+    initializeGenomicElement(g2, 0, asInteger(LEN-1));
+    initializeMutationRate(0);
+    initializeRecombinationRate(0);
+}
+
+ticks all 1 early() {
+    //# Ensure the symbiont transmission rates sum to 1
+    sum = p_mother + p_father + p_random;
+    if (abs(sum - 1.0) > 1e-8) {
+        error("Transmission probabilities p_mother + p_father + p_random must sum to 1 (got " + sum + ")");
+    }
+
+    host.setValue("migration_rate", 0.0);
+
+    host.addSubpop("p0", K);
+    symbiont.addSubpop("p1", K);
+    host.addSubpop("p2", K);
+    symbiont.addSubpop("p3", K);
+
+    for (s in p1.individuals, h in p0.individuals) {
+        s.tag = h.pedigreeID;
+        h.tag = s.pedigreeID;
+    }
+
+    for (s in p3.individuals, h in p2.individuals) {
+        s.tag = h.pedigreeID;
+        h.tag = s.pedigreeID;
+    }
+}
+
+species host asInteger((2*K*15)+1):asInteger((2*K*15)+(sample_time)) reproduction() {
+
+    // ###### Reproduction for p0 #######
+    migration_rate = host.getValue("migration_rate");
+    p0_sym_src = sample(1:3, K, replace = T, weights=c(p_mother, p_father, p_random));
+    p0_offspring_destination = sample(0:1, K, replace = T, weights=c(1 - migration_rate, migration_rate));
+    p0_src_1 = (p0_sym_src == 1);
+    p0_src_2 = (p0_sym_src == 2);
+    p0_src_3 = (p0_sym_src == 3);
+    p0_females =  p0.subsetIndividuals(sex="F");
+    p0_males =  p0.subsetIndividuals(sex="M");
+    p0_fparents = sample(p0_females, K, replace = T);
+    p0_mparents = sample(p0_males, K, replace = T);
+    p0_fparents_1 = p0_fparents[p0_src_1];
+    p0_fparents_2 = p0_fparents[p0_src_2];
+    p0_fparents_3 = p0_fparents[p0_src_3];
+    p0_mparents_1 = p0_mparents[p0_src_1];
+    p0_mparents_2 = p0_mparents[p0_src_2];
+    p0_mparents_3 = p0_mparents[p0_src_3];
+    p1_symbionts_1 = symbiont.individualsWithPedigreeIDs(p0_fparents_1.tag);    // group one gets symbionts from the female parent
+    p1_symbionts_2 = symbiont.individualsWithPedigreeIDs(p0_mparents_2.tag);    // group two gets symbionts from the male parent
+    p1_symbionts_3 = sample(p1.individuals, size(p0_fparents_3), replace = T);                          // group three chooses symbionts randomly from the population
+    p0_offspring_destination_1 = p0_offspring_destination[p0_src_1];
+    p0_offspring_destination_2 = p0_offspring_destination[p0_src_2];
+    p0_offspring_destination_3 = p0_offspring_destination[p0_src_3];
+
+    for (f in p0_fparents_1, m in p0_mparents_1, s in p1_symbionts_1, d in p0_offspring_destination_1)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+    for (f in p0_fparents_2, m in p0_mparents_2, s in p1_symbionts_2, d in p0_offspring_destination_2)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+        for (f in p0_fparents_3, m in p0_mparents_3, s in p1_symbionts_3, d in p0_offspring_destination_3)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+
+        // ###### Reproduction for p2 #######
+    p2_sym_src = sample(1:3, K, replace = T, weights=c(p_mother, p_father, p_random));
+    p2_offspring_destination = sample(0:1, K, replace = T, weights=c(migration_rate, 1 - migration_rate));
+    p2_src_1 = (p2_sym_src == 1);
+    p2_src_2 = (p2_sym_src == 2);
+    p2_src_3 = (p2_sym_src == 3);
+    p2_females =  p2.subsetIndividuals(sex="F");
+    p2_males =  p2.subsetIndividuals(sex="M");
+    p2_fparents = sample(p2_females, K, replace = T);
+    p2_mparents = sample(p2_males, K, replace = T);
+    p2_fparents_1 = p2_fparents[p2_src_1];
+    p2_fparents_2 = p2_fparents[p2_src_2];
+    p2_fparents_3 = p2_fparents[p2_src_3];
+    p2_mparents_1 = p2_mparents[p2_src_1];
+    p2_mparents_2 = p2_mparents[p2_src_2];
+    p2_mparents_3 = p2_mparents[p2_src_3];
+    p3_symbionts_1 = symbiont.individualsWithPedigreeIDs(p2_fparents_1.tag);    // group one gets symbionts from the female parent
+    p3_symbionts_2 = symbiont.individualsWithPedigreeIDs(p2_mparents_2.tag);    // group two gets symbionts from the male parent
+    p3_symbionts_3 = sample(p3.individuals, size(p2_fparents_3), replace = T);
+    p2_offspring_destination_1 = p2_offspring_destination[p2_src_1];
+    p2_offspring_destination_2 = p2_offspring_destination[p2_src_2];
+    p2_offspring_destination_3 = p2_offspring_destination[p2_src_3];
+
+    for (f in p2_fparents_1, m in p2_mparents_1, s in p3_symbionts_1, d in p2_offspring_destination_1)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+    for (f in p2_fparents_2, m in p2_mparents_2, s in p3_symbionts_2, d in p2_offspring_destination_2)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+        for (f in p2_fparents_3, m in p2_mparents_3, s in p3_symbionts_3, d in p2_offspring_destination_3)
+    {
+        if (d == 0){
+            new_h = p0.addCrossed(f, m);
+            new_s = p1.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+        else {
+            new_h = p2.addCrossed(f, m);
+            new_s = p3.addCloned(s);
+            new_h.tag = new_s.pedigreeID;
+            new_s.tag = new_h.pedigreeID;
+        }
+    }
+
+    self.active = 0;
+}
+
+species host 1:asInteger((2*K*15)) reproduction() {
+
+    all_females = c(p0.subsetIndividuals(sex="F"), p2.subsetIndividuals(sex="F"));
+    all_males   = c(p0.subsetIndividuals(sex="M"), p2.subsetIndividuals(sex="M"));
+    symb_all = c(p1.individuals, p3.individuals); 
+    sym_src  = sample(1:3, 2*K, replace=T, weights=c(p_mother, p_father, p_random));
+    offspring_dest = sample(0:1, 2*K, replace=T);
+    src_1 = (sym_src == 1);
+    src_2 = (sym_src == 2);
+    src_3 = (sym_src == 3);
+    fparents = sample(all_females, 2*K, replace=T);
+    mparents = sample(all_males,   2*K, replace=T);
+    fparents_1 = fparents[src_1];
+    mparents_2 = mparents[src_2];
+    fparents_3 = fparents[src_3];
+    mparents_3 = mparents[src_3];
+    symbionts_1 = symbiont.individualsWithPedigreeIDs(fparents_1.tag);
+    symbionts_2 = symbiont.individualsWithPedigreeIDs(mparents_2.tag);
+    symbionts_3 = sample(symb_all, size(fparents_3), replace=T);
+
+    dest_1 = offspring_dest[src_1];
+    dest_2 = offspring_dest[src_2];
+    dest_3 = offspring_dest[src_3];
+
+    for (f in fparents_1, m in mparents[src_1], s in symbionts_1, d in dest_1) {
+        if (d == 0) {
+            h = p0.addCrossed(f, m);
+            sym = p1.addCloned(s);
+        } else {
+            h = p2.addCrossed(f, m);
+            sym = p3.addCloned(s);
+        }
+        h.tag = sym.pedigreeID;
+        sym.tag = h.pedigreeID;
+    }
+
+    for (f in fparents[src_2], m in mparents_2, s in symbionts_2, d in dest_2) {
+        if (d == 0) {
+            h = p0.addCrossed(f, m);
+            sym = p1.addCloned(s);
+        } else {
+            h = p2.addCrossed(f, m);
+            sym = p3.addCloned(s);
+        }
+        h.tag = sym.pedigreeID;
+        sym.tag = h.pedigreeID;
+    }
+
+    for (f in fparents_3, m in mparents_3, s in symbionts_3, d in dest_3) {
+        if (d == 0) {
+            h = p0.addCrossed(f, m);
+            sym = p1.addCloned(s);
+        } else {
+            h = p2.addCrossed(f, m);
+            sym = p3.addCloned(s);
+        }
+        h.tag = sym.pedigreeID;
+        sym.tag = h.pedigreeID;
+    }
+
+    self.active = 0;
+
+}
+
+ticks all early() {
+    p1.individuals.genome2.removeMutations();
+}
+
+species host survival()  {
+    //# survival is independent of fitness; parents die, offspring live
+    return (individual.age == 0);
+}
+
+species symbiont survival()  {
+    //# survival is independent of fitness; parents die, offspring live
+    return (individual.age == 0);
+}
+
+ticks all ((2*K*15)) late() {
+    //# Change if you want migration after split
+    //#host.setValue("migration_rate", 0.0);
+}
+
+ticks all asInteger((2*K*15)):asInteger((2*K*15)+(sample_time)) late() {
+
+    ST = community.tick - asInteger(2*K*15);
+    if (any(ST == c(1, 10, 100, 1000))) {
+
+        pairs_outfile = pairs_header + ST + ".txt";
+        host_tree_outfile = host_tree_header + ST + ".trees";
+        symb_tree_outfile = symb_tree_header + ST + ".trees";
+        
+    
+        final_matches_str = "subpop\thost\tsymb\tallele\tfitness\tparent1\tparent2\tgrandparent1\tgrandparent2\tgrandparent3\tgrandparent4\n";
+        for (h in p0.individuals) {
+            parents = h.pedigreeParentIDs;
+            gparents = h.pedigreeGrandparentIDs;
+            final_matches_str = final_matches_str + h.subpopulation.name + "\t" + "h" + h.pedigreeID + "\t" + "s" + symbiont.individualsWithPedigreeIDs(h.tag).pedigreeID + "\t" + 0 + "\t" + h.fitnessScaling+ "\t" + parents[0] + "\t" + parents[1] + "\t" + gparents[0] + "\t" + gparents[1] + "\t" + gparents[2] + "\t" + gparents[3] + "\n";
+        }
+        for (h in p2.individuals) {
+            parents = h.pedigreeParentIDs;
+            gparents = h.pedigreeGrandparentIDs;
+            final_matches_str = final_matches_str + h.subpopulation.name + "\t" + "h" + h.pedigreeID + "\t" + "s" + symbiont.individualsWithPedigreeIDs(h.tag).pedigreeID + "\t" + 0 + "\t" + h.fitnessScaling+ "\t" + parents[0] + "\t" + parents[1] + "\t" + gparents[0] + "\t" + gparents[1] + "\t" + gparents[2] + "\t" + gparents[3] + "\n";
+        }
+        writeFile(pairs_outfile, final_matches_str);
+        host.treeSeqOutput(host_tree_outfile, simplify=T, includeModel=T);
+        symbiont.treeSeqOutput(symb_tree_outfile, simplify=T, includeModel=T);
+    }
+
+}

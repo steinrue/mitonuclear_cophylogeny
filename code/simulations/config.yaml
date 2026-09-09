@@ -1,0 +1,5 @@
+tmp_dir: "/scratch/rowanh/github_test/tmp"
+sim_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/slim_simulations"
+data_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/data"
+results_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/results"
+figure_dir: "/gpfs/data/steinruecken-lab/users/rowan/hart26mitonuclear-cophylogeny/figures"

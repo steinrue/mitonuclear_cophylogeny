@@ -1,0 +1,27 @@
+configfile: "config.yaml"
+
+include: "smk_files/admixture_and_incompatibility.smk"
+include: "smk_files/fis.smk"
+include: "smk_files/figures.smk"
+include: "smk_files/transmission_and_population_structure.smk"
+include: "smk_files/permutation_estimation.smk"
+    
+fig_names = ["transmission_boxplot", 
+            "transmission_qqplot",
+            "allele_incompatability_manhattan",
+            "allele_incompatability_aft",
+            "admixture_with_incompatability_boxplot",
+            "admixture_with_incompatability_aft",
+            "admixture_manhattan",
+            "simulation_fis",
+            "population_structure_boxplot",
+            "population_structure_qq",
+            "permutation_estimation"]
+
+rule all:
+  input:
+    expand("{figure_dir}/{figure}.pdf", figure_dir=config['figure_dir'], figure=fig_names)
+  resources:
+    time="1:00:00",
+    threads=1,
+    mem="1gb"

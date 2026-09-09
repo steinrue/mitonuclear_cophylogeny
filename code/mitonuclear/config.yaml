@@ -1,0 +1,14 @@
+# Configure File for Snakemake
+
+# Data and Intermediate File Storage
+tmp_dir: "/scratch/rowanh/github_test/tmp"
+tmp_dir2: "/gpfs/data/steinruecken-lab/users/rowan/JPT_deep_dive"
+data_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/data"
+trees_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/1KG_trees"
+analysis_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/analysis"
+results_dir: "/gpfs/data/steinruecken-lab/users/rowan/github_test/results"
+figure_dir: "/gpfs/data/steinruecken-lab/users/rowan/hart26mitonuclear-cophylogeny/figures"
+path_to_relate: "/gpfs/data/steinruecken-lab/users/rowan/mitochondria/relate_v1.2.4_x86_64_static"
+
+# Paralelle
+total_parallel: 12
