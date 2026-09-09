@@ -2,7 +2,7 @@
 
 See [simulations/](simulations/) for simulation-related code.<br>
 
-See [mitonuclear/](mitonuclear/) for code related to mitonuclear cophylogeny in the 1000 Genomes Project.
+See [mitonuclear/](mitonuclear/) for code related to mitonuclear cophylogeny in the 1000 Genomes Project.<br>
 
 ## Dependencies:
 ### Software
