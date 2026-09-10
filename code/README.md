@@ -11,10 +11,7 @@ Relate v1.2.4<br>
 bcftools v1.20<br>
 Haplogrep 3 3.2.1<br>
 PLINK v2.0.0-a.6.9LM<br>
-snakemake v7.32.4<br>
-bcftools v1.20<br>
-Haplogrep 3 3.2.1<br>
-PLINK v2.0.0-a.6.9LM<br>
+SLiM 4.0<br>
 
 ### Python
 All python scripts should be run with python 3. The following packages are used:<br>
