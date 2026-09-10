@@ -18,8 +18,6 @@ All python scripts should be run with python 3. The following packages are used:
 
 pandas<br>
 numpy<br>
-pickle<br>
-argparse<br>
 rpy2<br>
 scipy<br>
 tskit<br>
